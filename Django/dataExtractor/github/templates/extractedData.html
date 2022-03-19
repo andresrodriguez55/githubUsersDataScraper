@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+
+    <!-- Fontawesome CSS -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+
+    <!-- Datatable -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css">
+   
+    <title>Extract Data From Github</title>
+
+    <style>
+        .titleArea
+        {
+            height: 120px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="titleArea">
+        <h1>
+            Extracted Data From Github
+        </h1>
+    </div>
+
+    <div class="usersTable">    
+        <table id="usersTable" class="table dt-responsive" cellspacing="0" width="95%">
+            <thead>
+                <tr>
+                    <th scope="col">Username</th>
+                    <th scope="col">Full Name</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Personal Website</th>
+                    <th scope="col">Location</th>
+                    <th scope="col">Company</th>
+                    <th scope="col">Bio</th>
+                    <th scope="col">Followers Count</th>
+                    <th scope="col">Repositories Count</th>
+                    <th scope="col">Forks Obtained</th>
+                    <th scope="col">Stars Obtained</th>
+                    <th scope="col">Language Most Used</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in storedUsers %}
+                    <tr>
+                        <th scope="row">
+                            <a href="https://github.com/{{user.username}}" target="_blank">{{user.username}}</a>
+                        </th>
+                        <td>
+                            <p>{{user.name|default_if_none:""}}</p>
+                        </td>
+                        <td>
+                            <p>{{user.email|default_if_none:""}}</p>
+                        </td>
+                        <th>
+                            <p>{{user.websiteURL|default_if_none:""}}</p>
+                        </th>
+                        <td>
+                            <p>{{user.location|default_if_none:""}}</p>
+                        </td>
+                        <td>
+                            <p>{{user.company|default_if_none:""}}</p>
+                        </td>
+                        <td>
+                            <p>{{user.bio|default_if_none:""}}</p>
+                        </td>
+                        <td>
+                            <p>{{user.followersCount|default_if_none:""}}</p>
+                        </td>
+                        <th>
+                            <p>{{user.repositoriesCount|default_if_none:""}}</p>
+                        </th>
+                        <td>
+                            <p>{{user.forksObtained|default_if_none:""}}</p>
+                        </td>
+                        <td>
+                            <p>{{user.starsObtained|default_if_none:""}}</p>
+                        </td>
+                        <td>
+                            <p>{{user.languageMostUsed|default_if_none:""}}</p>
+                        </td>
+                    </tr>
+                {% endfor %}     
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Datatable -->
+    <script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js"></script>
+    <script>
+        $(document).ready(function(){
+            $('#usersTable').DataTable({
+                "order": [[ 4, 'desc' ]],
+                "bLengthChange":     false,
+                "pageLength": 5,
+                "responsive": true
+            });
+        });
+    </script>
+
+    <!-- Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+</body>

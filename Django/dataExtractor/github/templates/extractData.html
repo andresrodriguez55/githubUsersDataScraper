@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+
+    <!-- Fontawesome CSS -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+
+    <!-- Datatable -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css">
+   
+    <title>Extract Data From Github</title>
+
+    <style>
+        .titleArea
+        {
+            height: 120px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .searchBoxDiv
+        {
+            margin-left: auto;
+            margin-right: auto;
+            width: 80%;
+            margin-bottom: 80px;
+        }
+
+        .submitAllButtonArea
+        {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <div class="titleArea">
+        <h1>
+            Extract Data From Github
+        </h1>
+    </div>
+    
+
+     <div class="searchBoxDiv">
+        <form action="" method="get" class="input-group rounded">
+            <input type="search" name="query" class="form-control rounded" placeholder="Search" aria-label="Search" aria-describedby="search-addon" autocomplete="off"/>
+            <span class="input-group-text border-0" id="search-addon">
+                <i class="fas fa-search"></i>
+            </span>
+        </form>
+    </div>   
+
+    {% if users is not None %}
+        <div class="submitAllButtonArea">
+            <button id="submitAll">Submit all users on this table page</button>
+        </div>
+
+        <div class="usersTable">    
+            <table id="usersTable" class="table dt-responsive" cellspacing="0" width="95%">
+                <thead>
+                    <tr>
+                        <th scope="col" style="width: 40%">Profile Picture</th>
+                        <th scope="col">Full Name</th>
+                        <th scope="col">Language Most Used</th>
+                        <th scope="col">Repositories Count</th>
+                        <th scope="col">Total Stars Earned</th>
+                        <th scope="col">Total Forks Earned</th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                        <tr>
+                            <th scope="row">
+                                <img class="userProfilePicture" src={{user.profilePictureURL}} style="width: 13vh;"/>
+                            </th>
+                            <td>
+                                <p>{{user.name}}</p>
+                            </td>
+                            <td>
+                                <p>{{user.languageMostUsed}}</p>
+                            </td>
+                            <td>
+                                <p>{{user.repositoriesCount}}</p>
+                            </td>
+                            <td>
+                                <p>{{user.starsObtained}}</p>
+                            </td>
+                            <td>
+                                <p>{{user.forksObtained}}</p>
+                            </td>
+                            <td>
+                                <a href="http://www.github.com/{{user.username}}" target="_blank"><button>Check Github</button></a>
+                                <button id="submit" class="userData" value="{{user}}">Extract Data</button>
+                            </td>
+                        </tr>
+                    {% endfor %}     
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+
+    <!-- Insert data to database -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script type='text/javascript'>
+        $(document).on('click', '#submitAll', function(e) 
+        {
+            
+            let cookie = document.cookie;
+            let csrfToken = cookie.substring(cookie.indexOf('=') + 1);
+
+            let usersData = document.getElementsByClassName("userData");
+            for(var x = 0; x < usersData.length; x++) 
+            {
+                let currentUserData = JSON.parse(usersData[x].value.replace(/'/gi,'"'));
+                $.ajax(
+                {
+                    type: 'POST',
+                    url: '{% url "saveData" %}',
+                    data: currentUserData,
+                    headers: 
+                    {
+                        'X-CSRFToken': csrfToken
+                    },
+                })
+            }
+
+            alert("Saved data!")
+        })
+    </script>
+
+    <script>
+        $(document).on('click', '#submit', function(e) 
+        {
+            let data = $(this).val(); //string
+            data = JSON.parse(data.replace(/'/gi,'"')); //replace to avoid errors
+
+            let cookie = document.cookie
+            let csrfToken = cookie.substring(cookie.indexOf('=') + 1)   
+
+            $.ajax(
+            {
+                type: 'POST',
+                url: '{% url "saveData" %}',
+                data: data,
+                headers: 
+                {
+                    'X-CSRFToken': csrfToken
+                },
+
+                success: function(response)
+                {
+                    alert(response);
+                }
+            })
+        })
+        </script>
+
+    <!-- Datatable -->
+    <script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js"></script>
+    <script>
+        $(document).ready(function(){
+            $('#usersTable').DataTable({
+                "order": [[ 4, 'desc' ]],
+                "bLengthChange":     false,
+                "pageLength": 5,
+                "responsive": true
+            });
+        });
+    </script>
+
+    <!-- Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+</body>
